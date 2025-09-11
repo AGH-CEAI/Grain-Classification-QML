@@ -1,0 +1,33 @@
+Description
+===========
+
+The dataset contains a total of 288 grain images of three wheat varieties: 
+- Canadian, n = 108, 
+- Kama, n = 76, 
+- Rosa, n = 108.
+ 
+The specialized image processing package GRAINS [1] was used to measure the specific characteristics of each selected grain: kernel area, kernel perimeter, compactness, asymmetry coefficient, kernel length, kernel width, length of kernel groove, germ area, germ length. 
+
+The asymmetry coefficient is the ratio of two quantities: the absolute value of the difference between the areas of the left and right parts of a kernel and the total area of that kernel.
+
+Compactness is a shape descriptor calculated according to the formula C = 4*PI*A/(P*P), where A is the kernel area and P is the kernel perimeter. The maximum value of compactness is equal to one and is taken for a circle. For values close to zero, the shape becomes increasingly elongated.
+
+The file WheatGrainFeatures.xlsx contains the measurements. The unit of measurement is millimetres. The file contains the following variables:
+
+ No. - number,
+ Id - name of the wheat grain image,
+ wheatvariety - wheat variety (canadian, kama, rosa),
+ kernelarea - kernel area, 
+ kernelperimeter - kernel perimeter, 
+ compactness - compactness, 
+ kernellength - kernel length, 
+ kernelwidth - kernel width, 
+ asymmetry - asymmetry coefficient, 
+ groovelength - length of kernel groove, 
+ germarea - germ area, 
+ germlength - germ length. 
+
+
+References
+==========
+[1] Niewczas J., Wozniak W. Application of GRAINS program for characterization of X-ray images of wheat grains at different moisture content. Xth Seminar ''Properties of Water in Foods'', Warsaw Agricultural University, Department of Food Engineering, 1999. 
