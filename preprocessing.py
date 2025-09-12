@@ -36,3 +36,10 @@ def normalize_data(df: pd.DataFrame) -> pd.DataFrame:
     for col in CONTINUOUS_COLS:
         df[col] = (df[col] - df[col].min()) / (df[col].max() - df[col].min())
     return df
+
+
+def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
+    df = drop_columns(df)
+    df = encode_nominal_data(df)
+    df = normalize_data(df)
+    return df
