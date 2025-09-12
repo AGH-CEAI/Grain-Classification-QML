@@ -12,6 +12,7 @@ class TestPreprocessing(unittest.TestCase):
         self.df = preprocessing.get_excel_data()
         self.df_drop = preprocessing.drop_columns(self.df)
         self.df_numeric = preprocessing.encode_nominal_data(self.df)
+        self.df_normalized = preprocessing.normalize_data(self.df)
 
     def test_get_excel_data(self):
         self.assertEqual(self.df.shape[0], N_RECORDS)
@@ -25,6 +26,11 @@ class TestPreprocessing(unittest.TestCase):
         for col in preprocessing.NOMINAL_COLS:
             for val in self.df_numeric[col].unique():
                 self.assertIn(val, NUM_CATEGORIES)
+
+    def test_normalize_data(self):
+        for col in preprocessing.CONTINUOUS_COLS:
+            self.assertGreaterEqual(self.df_normalized[col].min(), 0)
+            self.assertLessEqual(self.df_normalized[col].max(), 1)
 
 
 if __name__ == "__main__":
