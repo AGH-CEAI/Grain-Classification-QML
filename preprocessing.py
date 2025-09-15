@@ -1,4 +1,6 @@
 import pandas as pd
+import numpy as np
+from typing import Tuple
 from sklearn.preprocessing import LabelEncoder
 
 EXCEL_DATA_LOCATION = "data/WheatGrainFeatures.xlsx"
@@ -20,6 +22,7 @@ COLS_TO_ADD = [
     "germlength_kernellength",
     "kernelwidth_kernellength",
 ]
+COL_FEATURES = COLS_TO_ADD + COLS_TO_KEEP
 
 
 def get_excel_data() -> pd.DataFrame:
@@ -38,7 +41,7 @@ def encode_nominal_data(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def normalize_data(df: pd.DataFrame) -> pd.DataFrame:
-    for col in set(COLS_TO_KEEP + COLS_TO_ADD):
+    for col in COL_FEATURES:
         df[col] = (df[col] - df[col].min()) / (df[col].max() - df[col].min())
     return df
 
@@ -51,9 +54,12 @@ def add_indirect_features(df: pd.DataFrame) -> pd.DataFrame:
     return df_new
 
 
-def preprocess_data(df: pd.DataFrame) -> pd.DataFrame:
+def preprocess_data(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
     df = drop_columns(df)
     df = encode_nominal_data(df)
     df = add_indirect_features(df)
     # df = normalize_data(df)
-    return df
+
+    X = df[COL_FEATURES].to_numpy()
+    y = df[COL_LABEL].to_numpy()
+    return X, y
