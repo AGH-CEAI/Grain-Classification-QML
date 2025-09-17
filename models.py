@@ -9,44 +9,67 @@ from sklearn.neural_network import MLPClassifier
 
 
 # Naive Bayes (NB)
+# No hyperparamenters given (maybe not needed here)
 def get_nb_model():
     return GaussianNB()
 
 
 # k-Nearest Neighbour (kNN)
+# n_neighbors = 5 -> mentioned on the article
 def get_knn_model(n_neighbors=5):
     return KNeighborsClassifier(n_neighbors=n_neighbors)
 
 
 # Support Vector Machine (SVM)
+# No kernel type or other hyperparameters
 def get_svm_model(kernel=["rbf"], C=1.0):
     return SVC(kernel=kernel, C=C)
 
 
 # Logistic Regression (LR)
+# No hyperparamenters given
+# C, solver, penalty, dual, tol
 def get_lr_model(C=1.0, max_iter=1000):
     return LogisticRegression(C=C, max_iter=max_iter)
 
 
 # eXtreme Gradient Boosting (XGB)
-def get_xgb_model(n_estimators=100, use_label_encoder=False, eval_metric="mlogloss"):
+# Hyperparameters given:
+#   number of classes: 3, objective: multi:softmax, learning rate: 0.1, maximum depth: 3.
+def get_xgb_model(
+    objective="multi:softmax",
+    num_class=3,
+    learning_rate=0.1,
+    max_depth=3,
+):
     return XGBClassifier(
-        n_estimators=n_estimators,
-        use_label_encoder=use_label_encoder,
-        eval_metric=eval_metric,
+        objective=objective,
+        num_class=num_class,
+        learning_rate=learning_rate,
+        max_depth=max_depth,
     )
 
 
 # Decision Tree (DT)
-def get_dt_model(max_depth=None):
+# max_depth was given
+def get_dt_model(max_depth=24):
     return DecisionTreeClassifier(max_depth=max_depth)
 
 
 # Random Forest (RF)
-def get_rf_model(n_estimators=100, max_depth=None):
-    return RandomForestClassifier(n_estimators=n_estimators, max_depth=max_depth)
+# No hyperparameters were given
+def get_rf_model():
+    return RandomForestClassifier()
 
 
 # Multi-layer Perceptron (MLP)
-def get_mlp_model(hidden_layer_sizes=(100,), max_iter=200):
-    return MLPClassifier(hidden_layer_sizes=hidden_layer_sizes, max_iter=max_iter)
+# No hidden layers, 12 input , 3 output, relu activation, adam solver, 300 max iter
+def get_mlp_model(
+    hidden_layer_sizes=(), activation=["relu"], solver=["adam"], max_iter=300
+):
+    return MLPClassifier(
+        hidden_layer_sizes=hidden_layer_sizes,
+        activation=activation,
+        solver=solver,
+        max_iter=max_iter,
+    )
