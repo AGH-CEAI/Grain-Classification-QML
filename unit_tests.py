@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 
 import preprocessing
+import pandas as pd
 
 
 N_RECORDS = 288
@@ -17,6 +18,7 @@ class TestPreprocessing(unittest.TestCase):
         self.df_numeric = preprocessing.encode_nominal_data(self.df)
         self.df_normalized = preprocessing.normalize_data(self.df_add)
         self.X, self.y = preprocessing.preprocess_data(self.df)
+        self.X_np, self.y_np = preprocessing.pd_to_numpy_X_y(self.X, self.y)
 
     def test_get_excel_data(self):
         self.assertEqual(self.df.shape[0], N_RECORDS)
@@ -45,12 +47,24 @@ class TestPreprocessing(unittest.TestCase):
         self.assertIn(preprocessing.COL_LABEL[0], self.df_add.columns)
 
     def test_preprocess_data(self):
-        self.assertIsInstance(self.X, np.ndarray)
-        self.assertIsInstance(self.y, np.ndarray)
+        self.assertIsInstance(self.X, pd.DataFrame)
+        self.assertIsInstance(self.y, pd.DataFrame)
         self.assertEqual(self.X.shape, (N_RECORDS, N_COLUMNS_TO_USE - 1))
         self.assertEqual(self.y.shape, (N_RECORDS, 1))
-        self.assertTrue(np.all(np.isin(self.y, [0, 1, 2])))
-        self.assertTrue(np.issubdtype(self.y.dtype, np.integer))
+        # Check for empty cells
+        self.assertTrue((self.X.isnull().values == False).all())
+        self.assertTrue((self.y.isnull().values == False).all())
+        # Check if correct labaling was used
+        self.assertTrue(self.y[preprocessing.COL_LABEL[0]].isin([0, 1, 2]).all())
+        # Check if all features and labels are of correct type
+        self.assertEqual(self.X.dtypes.unique().size, 1)
+        self.assertEqual(self.y.dtypes.unique().size, 1)
+        self.assertIsInstance(self.X[preprocessing.COL_FEATURES[0]][0], np.float64)
+        self.assertIsInstance(self.y[preprocessing.COL_LABEL[0]][0], np.integer)
+
+    def test_pd_to_numpy_X_Y(self):
+        self.assertIsInstance(self.X_np, np.ndarray)
+        self.assertIsInstance(self.y_np, np.ndarray)
 
 
 if __name__ == "__main__":

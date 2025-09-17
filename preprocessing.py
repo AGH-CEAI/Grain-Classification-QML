@@ -54,12 +54,18 @@ def add_indirect_features(df: pd.DataFrame) -> pd.DataFrame:
     return df_new
 
 
-def preprocess_data(df: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
+def preprocess_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     df = drop_columns(df)
     df = encode_nominal_data(df)
     df = add_indirect_features(df)
     # df = normalize_data(df)
 
-    X = df[COL_FEATURES].to_numpy()
-    y = df[COL_LABEL].to_numpy()
+    X = df[COL_FEATURES]
+    y = df[COL_LABEL]
     return X, y
+
+
+def pd_to_numpy_X_y(X: pd.DataFrame, y: pd.DataFrame) -> Tuple[np.ndarray, np.ndarray]:
+    X_np = X.to_numpy()
+    y_np = y.to_numpy().ravel()
+    return X_np, y_np
