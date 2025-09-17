@@ -58,7 +58,7 @@ def preprocess_data(df: pd.DataFrame) -> Tuple[pd.DataFrame, pd.DataFrame]:
     df = drop_columns(df)
     df = encode_nominal_data(df)
     df = add_indirect_features(df)
-    # df = normalize_data(df)
+    df = normalize_data(df)
 
     X = df[COL_FEATURES]
     y = df[COL_LABEL]

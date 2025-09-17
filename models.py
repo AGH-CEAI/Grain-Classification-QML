@@ -22,8 +22,8 @@ def get_knn_model(n_neighbors=5):
 
 # Support Vector Machine (SVM)
 # No kernel type or other hyperparameters
-def get_svm_model(kernel=["rbf"], C=1.0):
-    return SVC(kernel=kernel, C=C)
+def get_svm_model(kernel="rbf", C=1.0):
+    return SVC(kernel=kernel, C=C)  # type: ignore[arg-type]
 
 
 # Logistic Regression (LR)
@@ -52,7 +52,7 @@ def get_xgb_model(
 
 # Decision Tree (DT)
 # max_depth was given
-def get_dt_model(max_depth=24):
+def get_dt_model(max_depth: int = 24):
     return DecisionTreeClassifier(max_depth=max_depth)
 
 
@@ -65,11 +65,14 @@ def get_rf_model():
 # Multi-layer Perceptron (MLP)
 # No hidden layers, 12 input , 3 output, relu activation, adam solver, 300 max iter
 def get_mlp_model(
-    hidden_layer_sizes=(), activation=["relu"], solver=["adam"], max_iter=300
+    hidden_layer_sizes=(),
+    activation="relu",
+    solver="adam",
+    max_iter=300,
 ):
     return MLPClassifier(
         hidden_layer_sizes=hidden_layer_sizes,
-        activation=activation,
-        solver=solver,
+        activation=activation,  # type: ignore[arg-type]
+        solver=solver,  # type: ignore[arg-type]
         max_iter=max_iter,
     )
