@@ -76,3 +76,15 @@ def get_mlp_model(
         solver=solver,  # type: ignore[arg-type]
         max_iter=max_iter,
     )
+
+
+model_functions = {
+    "nb": get_nb_model,
+    "knn": get_knn_model,
+    "svm": get_svm_model,
+    "lr": get_lr_model,
+    "xgb": get_xgb_model,
+    "dt": get_dt_model,
+    "rf": get_rf_model,
+    "mlp": get_mlp_model,
+}
