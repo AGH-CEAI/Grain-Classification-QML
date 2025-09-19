@@ -1,0 +1,144 @@
+
+Classification report for nb:
+              precision    recall  f1-score   support
+
+           0       0.87      0.83      0.85       108
+           1       0.67      0.78      0.72        72
+           2       0.95      0.90      0.92       108
+
+    accuracy                           0.84       288
+   macro avg       0.83      0.84      0.83       288
+weighted avg       0.85      0.84      0.85       288
+
+Confusion matrix for nb:
+[[90 18  0]
+ [11 56  5]
+ [ 2  9 97]]
+
+******************************************************************************
+
+Classification report for knn:
+              precision    recall  f1-score   support
+
+           0       0.86      0.93      0.89       108
+           1       0.88      0.83      0.86        72
+           2       0.98      0.94      0.96       108
+
+    accuracy                           0.91       288
+   macro avg       0.91      0.90      0.90       288
+weighted avg       0.91      0.91      0.91       288
+
+Confusion matrix for knn:
+[[100   8   0]
+ [ 10  60   2]
+ [  6   0 102]]
+
+******************************************************************************
+
+Classification report for svm:
+              precision    recall  f1-score   support
+
+           0       0.87      0.96      0.92       108
+           1       0.94      0.81      0.87        72
+           2       0.97      0.96      0.97       108
+
+    accuracy                           0.92       288
+   macro avg       0.93      0.91      0.92       288
+weighted avg       0.93      0.92      0.92       288
+
+Confusion matrix for svm:
+[[104   4   0]
+ [ 11  58   3]
+ [  4   0 104]]
+
+******************************************************************************
+
+Classification report for lr:
+              precision    recall  f1-score   support
+
+           0       0.88      0.91      0.89       108
+           1       0.85      0.79      0.82        72
+           2       0.95      0.96      0.96       108
+
+    accuracy                           0.90       288
+   macro avg       0.89      0.89      0.89       288
+weighted avg       0.90      0.90      0.90       288
+
+Confusion matrix for lr:
+[[ 98   9   1]
+ [ 11  57   4]
+ [  3   1 104]]
+
+******************************************************************************
+
+Classification report for xgb:
+              precision    recall  f1-score   support
+
+           0       0.88      0.89      0.88       108
+           1       0.84      0.78      0.81        72
+           2       0.95      0.98      0.96       108
+
+    accuracy                           0.90       288
+   macro avg       0.89      0.88      0.88       288
+weighted avg       0.89      0.90      0.89       288
+
+Confusion matrix for xgb:
+[[ 96  11   1]
+ [ 11  56   5]
+ [  2   0 106]]
+
+******************************************************************************
+
+Classification report for dt:
+              precision    recall  f1-score   support
+
+           0       0.85      0.84      0.85       108
+           1       0.72      0.71      0.71        72
+           2       0.91      0.93      0.92       108
+
+    accuracy                           0.84       288
+   macro avg       0.83      0.83      0.83       288
+weighted avg       0.84      0.84      0.84       288
+
+Confusion matrix for dt:
+[[ 91  14   3]
+ [ 14  51   7]
+ [  2   6 100]]
+
+******************************************************************************
+
+Classification report for rf:
+              precision    recall  f1-score   support
+
+           0       0.88      0.91      0.89       108
+           1       0.82      0.78      0.80        72
+           2       0.95      0.95      0.95       108
+
+    accuracy                           0.89       288
+   macro avg       0.88      0.88      0.88       288
+weighted avg       0.89      0.89      0.89       288
+
+Confusion matrix for rf:
+[[ 98  10   0]
+ [ 11  56   5]
+ [  3   2 103]]
+
+******************************************************************************
+
+Classification report for mlp:
+              precision    recall  f1-score   support
+
+           0       0.82      0.90      0.85       108
+           1       0.69      0.15      0.25        72
+           2       0.70      0.99      0.82       108
+
+    accuracy                           0.75       288
+   macro avg       0.73      0.68      0.64       288
+weighted avg       0.74      0.75      0.69       288
+
+Confusion matrix for mlp:
+[[ 97   5   6]
+ [ 21  11  40]
+ [  1   0 107]]
+
+******************************************************************************
