@@ -31,3 +31,8 @@ The file WheatGrainFeatures.xlsx contains the measurements. The unit of measurem
 References
 ==========
 [1] Niewczas J., Wozniak W. Application of GRAINS program for characterization of X-ray images of wheat grains at different moisture content. Xth Seminar ''Properties of Water in Foods'', Warsaw Agricultural University, Department of Food Engineering, 1999. 
+
+
+License: Creative Commons Attribution 4.0 International (https://creativecommons.org/licenses/by/4.0/legalcode) 
+Data manager: Małgorzata Charytanowicz
+Data taken from https://zenodo.org/records/15172506
