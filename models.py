@@ -63,15 +63,14 @@ def get_rf_model():
 
 
 # Multi-layer Perceptron (MLP)
-# No hidden layers, 12 input , 3 output, relu activation, adam solver, 300 max iter
+# No info about hidden layers
+# 12 input , 3 output, relu activation, adam solver, 300 max iter
 def get_mlp_model(
-    hidden_layer_sizes=(),
     activation="relu",
     solver="adam",
     max_iter=300,
 ):
     return MLPClassifier(
-        hidden_layer_sizes=hidden_layer_sizes,
         activation=activation,  # type: ignore[arg-type]
         solver=solver,  # type: ignore[arg-type]
         max_iter=max_iter,
