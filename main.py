@@ -6,7 +6,7 @@ from sklearn.metrics import (
 from sklearn.model_selection import StratifiedKFold
 from experiments import exp_run_all_class_models
 import preprocessing
-import models
+import models.benchmark_models as benchmark_models
 import evaluation
 
 

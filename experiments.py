@@ -1,7 +1,7 @@
 from sklearn.calibration import cross_val_predict
 from sklearn.model_selection import StratifiedKFold
 import evaluation
-import models
+import models.benchmark_models as benchmark_models
 import preprocessing
 
 
@@ -12,7 +12,7 @@ def exp_run_all_class_models(file_name: str, seed: int):
 
     with open(f"results/{file_name}.txt", "x") as f:
         f.write(f"\nSEED: {seed}\n")
-        for model_name, model_fun in models.model_functions.items():
+        for model_name, model_fun in benchmark_models.model_functions.items():
             model = model_fun()
             cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed)
             y_pred = cross_val_predict(model, X, y, cv=cv)
