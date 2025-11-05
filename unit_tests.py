@@ -1,8 +1,11 @@
+import sys
 import unittest
 import numpy as np
+import pandas as pd
+from torch.utils.data import TensorDataset
 
 import preprocessing
-import pandas as pd
+import evaluation
 
 
 N_RECORDS = 288
@@ -19,6 +22,8 @@ class TestPreprocessing(unittest.TestCase):
         self.df_normalized = preprocessing.normalize_data(self.df_add)
         self.X, self.y = preprocessing.preprocess_data(self.df)
         self.X_np, self.y_np = preprocessing.pd_to_numpy_X_y(self.X, self.y)
+        self.tensor_ds = preprocessing.get_tensor_dataset(self.X_np, self.y_np)
+        self.tensor_ds_2 = preprocessing.get_tensor_dataset(self.X, self.y)
 
     def test_get_excel_data(self):
         self.assertEqual(self.df.shape[0], N_RECORDS)
@@ -66,6 +71,17 @@ class TestPreprocessing(unittest.TestCase):
         self.assertIsInstance(self.X_np, np.ndarray)
         self.assertIsInstance(self.y_np, np.ndarray)
 
+    def test_get_tensor_dataset(self):
+        self.assertIsInstance(self.tensor_ds, TensorDataset)
+        self.assertEqual(self.tensor_ds.tensors[0].shape[0], self.X_np.shape[0])
+        self.assertEqual(self.tensor_ds.tensors[0].shape[1], self.X_np.shape[1])
+        self.assertEqual(self.tensor_ds.tensors[1].shape[0], self.y_np.shape[0])
+
+        self.assertIsInstance(self.tensor_ds_2, TensorDataset)
+        self.assertEqual(self.tensor_ds_2.tensors[0].shape[0], self.X.shape[0])
+        self.assertEqual(self.tensor_ds_2.tensors[0].shape[1], self.X.shape[1])
+        self.assertEqual(self.tensor_ds_2.tensors[1].shape[0], self.y.shape[0])
+
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(buffer=False)

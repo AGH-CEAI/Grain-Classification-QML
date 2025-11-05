@@ -2,6 +2,9 @@ import pandas as pd
 import numpy as np
 from typing import Tuple
 from sklearn.preprocessing import LabelEncoder
+import torch
+from torch.utils.data import TensorDataset
+
 
 EXCEL_DATA_LOCATION = "data/WheatGrainFeatures.xlsx"
 COLS_TO_DROP = ["No.", "Id"]
@@ -69,3 +72,16 @@ def pd_to_numpy_X_y(X: pd.DataFrame, y: pd.DataFrame) -> Tuple[np.ndarray, np.nd
     X_np = X.to_numpy()
     y_np = y.to_numpy().ravel()
     return X_np, y_np
+
+
+def get_tensor_dataset(
+    X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame
+) -> TensorDataset:
+    if isinstance(X, pd.DataFrame):
+        X = X.to_numpy()
+    if isinstance(y, pd.DataFrame):
+        y = y.to_numpy().ravel()
+
+    X_tensor = torch.tensor(X, dtype=torch.float32)
+    y_tensor = torch.tensor(y, dtype=torch.long)
+    return TensorDataset(X_tensor, y_tensor)
