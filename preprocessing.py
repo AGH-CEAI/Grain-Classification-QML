@@ -74,13 +74,7 @@ def pd_to_numpy_X_y(X: pd.DataFrame, y: pd.DataFrame) -> Tuple[np.ndarray, np.nd
     return X_np, y_np
 
 
-def get_tensor_dataset(
-    X: np.ndarray | pd.DataFrame, y: np.ndarray | pd.DataFrame
-) -> TensorDataset:
-    if isinstance(X, pd.DataFrame):
-        X = X.to_numpy()
-    if isinstance(y, pd.DataFrame):
-        y = y.to_numpy().ravel()
+def get_tensor_dataset(X: np.ndarray, y: np.ndarray) -> TensorDataset:
 
     X_tensor = torch.tensor(X, dtype=torch.float32)
     y_tensor = torch.tensor(y, dtype=torch.long)
