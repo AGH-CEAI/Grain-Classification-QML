@@ -1,8 +1,12 @@
 from sklearn.calibration import cross_val_predict
+from sklearn.metrics import classification_report
 from sklearn.model_selection import StratifiedKFold
+
 import evaluation
 import models.benchmark_models as benchmark_models
 import preprocessing
+from models.mlp import MLP
+from training import cross_val_train
 
 
 def exp_run_all_class_models(file_name: str, seed: int):
@@ -21,3 +25,14 @@ def exp_run_all_class_models(file_name: str, seed: int):
             f.write(
                 "\n\n******************************************************************************\n"
             )
+
+
+def exp_run_mlp(seed: int):
+    df = preprocessing.get_excel_data()
+    X, y = preprocessing.preprocess_data(df)
+    X, y = preprocessing.pd_to_numpy_X_y(X, y)
+
+    model = MLP(input_dim=X.shape[1], hidden_dim=100, output_dim=3)
+    preds = cross_val_train(model=model, X=X, y=y)
+
+    print(classification_report(y, preds))

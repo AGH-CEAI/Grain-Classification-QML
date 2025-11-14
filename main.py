@@ -4,18 +4,16 @@ from sklearn.metrics import (
     confusion_matrix,
 )
 from sklearn.model_selection import StratifiedKFold
-from experiments import exp_run_all_class_models
+
+import experiments
 import preprocessing
 import models.benchmark_models as benchmark_models
 import evaluation
 
 
 def main():
-    exp_run_all_class_models("initial_classical_results_42_mlp_new", 42)
-    # model = models.get_knn_model()
-    # cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
-    # precision_macro = make_scorer(precision_score, average="macro")
-    # y_pred = cross_val_predict(model, X, y, cv=cv)
+    # exp_run_all_class_models("initial_classical_results_42_mlp_new", 42)
+    experiments.exp_run_mlp(seed=42)
 
 
 if __name__ == "__main__":
