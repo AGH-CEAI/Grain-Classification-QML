@@ -4,7 +4,7 @@ import pytorch_lightning as pl
 
 
 class MLP(pl.LightningModule):
-    def __init__(self, input_dim, hidden_dim, output_dim, lr=1e-3):
+    def __init__(self, input_dim, hidden_dim=100, output_dim=3, lr=1e-3):
         super().__init__()
         self.save_hyperparameters()
         self.model = nn.Sequential(
@@ -31,6 +31,11 @@ class MLP(pl.LightningModule):
         acc = (logits.argmax(dim=1) == y).float().mean()
         self.log("val_loss", loss, prog_bar=True)
         self.log("val_acc", acc, prog_bar=True)
+
+    def predict_step(self, batch, batch_idx):
+        x, _ = batch
+        logits = self(x)
+        return torch.argmax(logits, dim=1)
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.lr)  # type: ignore
