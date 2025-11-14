@@ -23,7 +23,7 @@ class TestPreprocessing(unittest.TestCase):
         self.X, self.y = preprocessing.preprocess_data(self.df)
         self.X_np, self.y_np = preprocessing.pd_to_numpy_X_y(self.X, self.y)
         self.tensor_ds = preprocessing.get_tensor_dataset(self.X_np, self.y_np)
-        self.tensor_ds_2 = preprocessing.get_tensor_dataset(self.X, self.y)
+        self.tensor_ds_2 = preprocessing.get_tensor_dataset(self.X_np, self.y_np)
 
     def test_get_excel_data(self):
         self.assertEqual(self.df.shape[0], N_RECORDS)
@@ -81,6 +81,11 @@ class TestPreprocessing(unittest.TestCase):
         self.assertEqual(self.tensor_ds_2.tensors[0].shape[0], self.X.shape[0])
         self.assertEqual(self.tensor_ds_2.tensors[0].shape[1], self.X.shape[1])
         self.assertEqual(self.tensor_ds_2.tensors[1].shape[0], self.y.shape[0])
+
+
+class TestTraining(unittest.TestCase):
+    def setUp(self) -> None:
+        return super().setUp()
 
 
 if __name__ == "__main__":
