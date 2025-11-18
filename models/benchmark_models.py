@@ -65,7 +65,7 @@ def get_rf_model():
 # Multi-layer Perceptron (MLP)
 # No info about hidden layers.
 # By default: hidden_layer_sizes=(100,), learning_rate_init: Float = 0.001
-# 12 input , 3 output, relu activation, adam solver, 300 max iter
+# 12 input , 3 output, relu activation, adam solver, 300 max iter, batch_size=min(200, n_samples).
 def get_mlp_model(
     activation="relu",
     solver="adam",

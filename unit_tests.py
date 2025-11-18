@@ -6,6 +6,7 @@ from torch.utils.data import TensorDataset
 
 import preprocessing
 import evaluation
+from data.load_data import get_excel_data
 
 
 N_RECORDS = 288
@@ -15,7 +16,7 @@ NUM_CATEGORIES = {0, 1, 2}
 
 class TestPreprocessing(unittest.TestCase):
     def setUp(self):
-        self.df = preprocessing.get_excel_data()
+        self.df = get_excel_data()
         self.df_drop = preprocessing.drop_columns(self.df)
         self.df_add = preprocessing.add_indirect_features(self.df_drop)
         self.df_numeric = preprocessing.encode_nominal_data(self.df)

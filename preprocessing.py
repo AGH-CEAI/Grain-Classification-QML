@@ -6,7 +6,6 @@ import torch
 from torch.utils.data import TensorDataset
 
 
-EXCEL_DATA_LOCATION = "data/WheatGrainFeatures.xlsx"
 COLS_TO_DROP = ["No.", "Id"]
 COL_LABEL = ["wheatvariety"]
 COLS_TO_KEEP = [
@@ -26,10 +25,6 @@ COLS_TO_ADD = [
     "kernelwidth_kernellength",
 ]
 COL_FEATURES = COLS_TO_ADD + COLS_TO_KEEP
-
-
-def get_excel_data() -> pd.DataFrame:
-    return pd.read_excel(EXCEL_DATA_LOCATION)
 
 
 def drop_columns(df: pd.DataFrame) -> pd.DataFrame:
