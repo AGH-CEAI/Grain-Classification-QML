@@ -6,7 +6,7 @@ from torch.utils.data import TensorDataset
 
 import preprocessing
 import evaluation
-from data.load_data import get_excel_data
+from data.load_data import get_excel_data, get_image_data
 
 
 N_RECORDS = 288
@@ -87,6 +87,16 @@ class TestPreprocessing(unittest.TestCase):
 class TestTraining(unittest.TestCase):
     def setUp(self) -> None:
         return super().setUp()
+
+
+class TestLoadData(unittest.TestCase):
+
+    def setUp(self) -> None:
+        self.img_labels, self.imgs = get_image_data()
+
+    def test_get_image_data(self):
+        self.assertEqual(len(self.img_labels), N_RECORDS)
+        self.assertEqual(len(self.imgs), N_RECORDS)
 
 
 if __name__ == "__main__":
