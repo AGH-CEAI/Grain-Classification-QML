@@ -1,3 +1,4 @@
+from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
 import os
@@ -18,11 +19,9 @@ def get_image_data() -> Tuple[List[str], List[np.ndarray]]:
     dir_list = os.listdir(IMAGE_DATA_LOCATION)
     imgs: List[np.ndarray] = []
     for filename in dir_list:
-        with Image.open(os.path.join(IMAGE_DATA_LOCATION, filename)) as img:
+        with Image.open(os.path.join(IMAGE_DATA_LOCATION, filename)).convert(
+            "L"
+        ) as img:
             imgs.append(np.array(img))
 
     return dir_list, imgs
-
-
-# roses = list(data_dir.glob("roses/*"))
-# PIL.Image.open(str(roses[1]))
