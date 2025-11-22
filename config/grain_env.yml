@@ -1,0 +1,23 @@
+name: grain_env
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+  - defaults
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/r
+dependencies:
+  - numpy
+  - pillow
+  - pip
+  - torchvision
+  - pytorch-cuda=12.1
+  - matplotlib
+  - python=3.10
+  - pytorch
+  - pandas
+  - scikit-learn
+  - openpyxl
+  - xgboost
+  - pytorch-lightning
+prefix: /home/sebastian/miniconda3/envs/grain_env
