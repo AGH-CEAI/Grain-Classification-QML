@@ -7,7 +7,12 @@ from torch.utils.data import TensorDataset
 
 import preprocessing
 import evaluation
-from data.load_data import get_excel_data, get_images_paths, load_image
+from data.load_data import (
+    get_excel_data,
+    get_images_filenames,
+    load_all_images,
+    load_image,
+)
 from PIL import Image
 
 N_RECORDS = 288
@@ -93,11 +98,11 @@ class TestTraining(unittest.TestCase):
 class TestImageDataLoadAndPreprocessing(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.imgs_paths = get_images_paths()
-        self.img_example = load_image(self.imgs_paths[0])
+        self.imgs_names, self.images = load_all_images()
+        self.img_example = self.images[0]
 
     def test_load_images(self):
-        self.assertEqual(len(self.imgs_paths), N_RECORDS)
+        self.assertEqual(len(self.imgs_names), N_RECORDS)
         self.assertEqual(type(self.img_example), Image.Image)
 
     def test_to_grayscale(self):
