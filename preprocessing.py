@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from typing import Tuple
+from typing import List, Tuple
 from sklearn.preprocessing import LabelEncoder
 import torch
 from torch.utils.data import TensorDataset
@@ -96,7 +96,48 @@ def center_crop(img: Image.Image, target_width: int, target_height: int) -> Imag
     return img.crop((left, top, right, bottom))
 
 
+def pad_image(img: Image.Image, target_width: int, target_height: int) -> Image.Image:
+    org_width, org_height = img.size
+    if target_height < org_height or target_width < org_width:
+        raise ValueError(
+            f"Target dimensions ({target_width}, {target_height}) can't be smaller than original dimensions ({org_width}, {org_height})"
+        )
+    new_image = Image.new(img.mode, (target_width, target_height))
+    pad_size_left = (target_width - org_width) // 2
+    pad_size_top = (target_height - org_height) // 2
+    new_image.paste(img, (pad_size_left, pad_size_top))
+    return new_image
+
+
 def image_to_tensor(img: Image.Image) -> torch.Tensor:
     to_tensor = transforms.ToTensor()
     tensor = to_tensor(img)
     return tensor
+
+
+def get_max_sizes(images: List[Image.Image]) -> Tuple[int, int]:
+    w, h = [], []
+    for img in images:
+        w.append(img.width)
+        h.append(img.height)
+    return max(w), max(h)
+
+
+def get_min_sizes(images: List[Image.Image]) -> Tuple[int, int]:
+    w, h = [], []
+    for img in images:
+        w.append(img.width)
+        h.append(img.height)
+    return min(w), min(h)
+
+
+def preprocess_images(images: List[Image.Image]):
+    max_width, max_height = get_max_sizes(images)
+
+    preprocessed_images = []
+    for img in images:
+        img = to_grayscale(img)
+        img = pad_image(img, max_width, max_height)
+        preprocessed_images.append(img)
+
+    return preprocessed_images

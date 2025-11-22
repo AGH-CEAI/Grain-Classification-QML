@@ -129,6 +129,10 @@ class TestImageDataLoadAndPreprocessing(unittest.TestCase):
                     cropped_pixels[i, j], original_pixels[i + left, j + top]  # type: ignore
                 )
 
+    def test_pad_image(self):
+        padded_image = preprocessing.pad_image(self.img_example, 850, 850)
+        self.assertEqual((850, 850), padded_image.size)
+
     def test_image_to_tensor(self):
         tensor = preprocessing.image_to_tensor(self.img_example)
         # Check tensor shape: (C, H, W)
