@@ -14,14 +14,20 @@ def get_excel_data() -> pd.DataFrame:
     return pd.read_excel(EXCEL_DATA_LOCATION)
 
 
-def get_image_data() -> Tuple[List[str], List[np.ndarray]]:
-    # Get the list of all files and directories
-    dir_list = os.listdir(IMAGE_DATA_LOCATION)
-    imgs: List[np.ndarray] = []
-    for filename in dir_list:
-        with Image.open(os.path.join(IMAGE_DATA_LOCATION, filename)).convert(
-            "L"
-        ) as img:
-            imgs.append(np.array(img))
+def get_images_paths() -> List[str]:
+    dir_list = [
+        os.path.join(IMAGE_DATA_LOCATION, fname)  # get the full path to file
+        for fname in os.listdir(
+            IMAGE_DATA_LOCATION
+        )  # list all files and dirs in the location
+        if os.path.isfile(
+            os.path.join(IMAGE_DATA_LOCATION, fname)
+        )  # limit list only to files
+    ]
 
-    return dir_list, imgs
+    return dir_list
+
+
+def load_image(path: str) -> Image.Image:
+    with Image.open(path) as img:
+        return img.copy()

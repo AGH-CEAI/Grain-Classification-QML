@@ -6,8 +6,8 @@ from torch.utils.data import TensorDataset
 
 import preprocessing
 import evaluation
-from data.load_data import get_excel_data, get_image_data
-
+from data.load_data import get_excel_data, get_images_paths, load_image
+from PIL import Image
 
 N_RECORDS = 288
 N_COLUMNS_TO_USE = 13  # 12 features + 1 label
@@ -92,11 +92,14 @@ class TestTraining(unittest.TestCase):
 class TestLoadData(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.img_labels, self.imgs = get_image_data()
+        self.imgs_paths = get_images_paths()
+        self.img_example = load_image(self.imgs_paths[0])
 
-    def test_get_image_data(self):
-        self.assertEqual(len(self.img_labels), N_RECORDS)
-        self.assertEqual(len(self.imgs), N_RECORDS)
+    def test_load_images(self):
+        self.assertEqual(len(self.imgs_paths), N_RECORDS)
+        self.assertEqual(type(self.img_example), Image.Image)
+
+    # def test_image_preprocessing(self):
 
 
 if __name__ == "__main__":
