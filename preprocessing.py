@@ -4,6 +4,8 @@ from typing import Tuple
 from sklearn.preprocessing import LabelEncoder
 import torch
 from torch.utils.data import TensorDataset
+from PIL import Image
+from torchvision import transforms
 
 
 COLS_TO_DROP = ["No.", "Id"]
@@ -74,3 +76,27 @@ def get_tensor_dataset(X: np.ndarray, y: np.ndarray) -> TensorDataset:
     X_tensor = torch.tensor(X, dtype=torch.float32)
     y_tensor = torch.tensor(y, dtype=torch.long)
     return TensorDataset(X_tensor, y_tensor)
+
+
+### IMAGE PREPROCESSING ########################################
+
+
+def to_grayscale(img: Image.Image) -> Image.Image:
+    return img.convert("L")
+
+
+def center_crop(img: Image.Image, target_width: int, target_height: int) -> Image.Image:
+    width, height = img.size
+
+    left = (width - target_width) // 2
+    top = (height - target_height) // 2
+    right = left + target_width
+    bottom = top + target_height
+
+    return img.crop((left, top, right, bottom))
+
+
+def image_to_tensor(img: Image.Image) -> torch.Tensor:
+    to_tensor = transforms.ToTensor()
+    tensor = to_tensor(img)
+    return tensor

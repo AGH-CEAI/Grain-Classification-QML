@@ -2,6 +2,7 @@ import sys
 import unittest
 import numpy as np
 import pandas as pd
+import torch
 from torch.utils.data import TensorDataset
 
 import preprocessing
@@ -14,7 +15,7 @@ N_COLUMNS_TO_USE = 13  # 12 features + 1 label
 NUM_CATEGORIES = {0, 1, 2}
 
 
-class TestPreprocessing(unittest.TestCase):
+class TestExcelDataLoadAndPreprocessing(unittest.TestCase):
     def setUp(self):
         self.df = get_excel_data()
         self.df_drop = preprocessing.drop_columns(self.df)
@@ -89,7 +90,7 @@ class TestTraining(unittest.TestCase):
         return super().setUp()
 
 
-class TestLoadData(unittest.TestCase):
+class TestImageDataLoadAndPreprocessing(unittest.TestCase):
 
     def setUp(self) -> None:
         self.imgs_paths = get_images_paths()
@@ -99,7 +100,44 @@ class TestLoadData(unittest.TestCase):
         self.assertEqual(len(self.imgs_paths), N_RECORDS)
         self.assertEqual(type(self.img_example), Image.Image)
 
-    # def test_image_preprocessing(self):
+    def test_to_grayscale(self):
+        gray_img = preprocessing.to_grayscale(self.img_example)
+        self.assertEqual(gray_img.mode, "L")
+        self.assertEqual(gray_img.size, self.img_example.size)
+
+    def test_center_crop(self):
+        cropped = preprocessing.center_crop(self.img_example, 50, 50)
+        self.assertEqual(cropped.size, (50, 50))
+
+        # Test that crop is centered
+        left, top = (self.img_example.width - 50) // 2, (
+            self.img_example.height - 50
+        ) // 2
+        right, bottom = left + 50, top + 50
+
+        cropped_pixels = cropped.load()
+        original_pixels = self.img_example.load()
+
+        for i in range(50):
+            for j in range(50):
+                self.assertEqual(
+                    cropped_pixels[i, j], original_pixels[i + left, j + top]  # type: ignore
+                )
+
+    def test_image_to_tensor(self):
+        tensor = preprocessing.image_to_tensor(self.img_example)
+        # Check tensor shape: (C, H, W)
+        expected_shape = (
+            len(self.img_example.getbands()),
+            self.img_example.height,
+            self.img_example.width,
+        )
+        self.assertEqual(tensor.shape, expected_shape)
+        # Check dtype
+        self.assertTrue(torch.is_tensor(tensor))
+        self.assertTrue(tensor.dtype == torch.float32)
+        # Check values are in [0, 1]
+        self.assertTrue(tensor.max() <= 1.0 and tensor.min() >= 0.0)
 
 
 if __name__ == "__main__":
