@@ -9,6 +9,7 @@ from torchvision import transforms
 
 
 COLS_TO_DROP = ["No.", "Id"]
+COL_ID = ["Id"]
 COL_LABEL = ["wheatvariety"]
 COLS_TO_KEEP = [
     "kernelarea",
@@ -71,10 +72,16 @@ def pd_to_numpy_X_y(X: pd.DataFrame, y: pd.DataFrame) -> Tuple[np.ndarray, np.nd
     return X_np, y_np
 
 
-def get_tensor_dataset(X: np.ndarray, y: np.ndarray) -> TensorDataset:
-
+def numpy_to_tensor_X_y(
+    X: np.ndarray, y: np.ndarray
+) -> Tuple[torch.Tensor, torch.Tensor]:
     X_tensor = torch.tensor(X, dtype=torch.float32)
     y_tensor = torch.tensor(y, dtype=torch.long)
+    return X_tensor, y_tensor
+
+
+def get_tensor_dataset(X: np.ndarray, y: np.ndarray) -> TensorDataset:
+    X_tensor, y_tensor = numpy_to_tensor_X_y(X, y)
     return TensorDataset(X_tensor, y_tensor)
 
 
@@ -131,13 +138,40 @@ def get_min_sizes(images: List[Image.Image]) -> Tuple[int, int]:
     return min(w), min(h)
 
 
-def preprocess_images(images: List[Image.Image]):
+def preprocess_images(images: List[Image.Image]) -> torch.Tensor:
     max_width, max_height = get_max_sizes(images)
 
     preprocessed_images = []
     for img in images:
         img = to_grayscale(img)
         img = pad_image(img, max_width, max_height)
+        img = image_to_tensor(img)
         preprocessed_images.append(img)
 
-    return preprocessed_images
+    return torch.stack(preprocessed_images, dim=0)
+
+
+### JOINED PREPROCESSING ########################################
+
+
+def sort_dataframe(df: pd.DataFrame, ids: List[str]) -> pd.DataFrame:
+    return df.set_index("id").loc[ids].reset_index()
+
+
+def preprocess_all(
+    df: pd.DataFrame, imgs: List[Image.Image], ids: List[str]
+) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+    df = sort_dataframe(df, ids)
+    imgs_tensor = preprocess_images(imgs)
+    df_x, df_y = preprocess_data(df)
+
+    numpy_x, numpy_y = pd_to_numpy_X_y(df_x, df_y)
+    tensor_x, tensor_y = numpy_to_tensor_X_y(numpy_x, numpy_y)
+
+    return tensor_x, imgs_tensor, tensor_y
+
+
+def tensors_to_dataset(
+    features: torch.Tensor, imgs: torch.Tensor, labels: torch.Tensor
+) -> TensorDataset:
+    return TensorDataset(features, imgs, labels)

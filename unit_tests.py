@@ -1,5 +1,6 @@
 import sys
 import unittest
+from unittest.mock import patch, MagicMock
 import numpy as np
 import pandas as pd
 import torch
@@ -95,7 +96,7 @@ class TestTraining(unittest.TestCase):
         return super().setUp()
 
 
-class TestImageDataLoadAndPreprocessing(unittest.TestCase):
+class TestImageLoadAndPreprocessing(unittest.TestCase):
 
     def setUp(self) -> None:
         self.imgs_names, self.images = load_all_images()
@@ -147,6 +148,86 @@ class TestImageDataLoadAndPreprocessing(unittest.TestCase):
         self.assertTrue(tensor.dtype == torch.float32)
         # Check values are in [0, 1]
         self.assertTrue(tensor.max() <= 1.0 and tensor.min() >= 0.0)
+
+
+class TestPreprocessingUtilities(unittest.TestCase):
+
+    def test_sort_dataframe(self):
+        # Mock data
+        df = pd.DataFrame({"id": ["b", "a", "c"], "value": [2, 1, 3]})
+        ids = ["a", "b", "c"]
+
+        sorted_df = preprocessing.sort_dataframe(df, ids)
+
+        # Check order
+        self.assertEqual(sorted_df["id"].tolist(), ids)
+        # Check values are aligned
+        self.assertEqual(sorted_df["value"].tolist(), [1, 2, 3])
+
+
+@patch("data.preprocessing.preprocess_images")
+@patch("data.preprocessing.preprocess_data")
+def test_preprocess_all(self, mock_preprocess_data, mock_preprocess_images):
+    # -------- Input data --------
+    df = pd.DataFrame(
+        {
+            "id": ["b", "a", "c"],
+            "feat1": [10, 20, 30],
+            "feat2": [1.0, 2.0, 3.0],
+            "label": [0, 1, 0],
+        }
+    )
+    imgs = [
+        Image.new("L", (1, 1)),
+        Image.new("L", (1, 1)),
+        Image.new("L", (1, 1)),
+    ]  # placeholders
+    ids = ["a", "b", "c"]  # desired order
+
+    # -------- Mock behavior --------
+    mock_preprocess_images.return_value = torch.randn(3, 1, 100, 100)
+
+    # preprocess_data returns Xdf and ydf
+    mock_x = pd.DataFrame({"feat1": [20, 10, 30], "feat2": [2, 1, 3]})
+    mock_y = pd.Series([1, 0, 0])
+    mock_preprocess_data.return_value = (mock_x, mock_y)
+
+    # -------- Call function --------
+    tensor_x, imgs_tensor, tensor_y = preprocessing.preprocess_all(df, imgs, ids)
+
+    # -------- Assertions --------
+    # images called correctly
+    mock_preprocess_images.assert_called_once_with(imgs)
+
+    # df was sorted BEFORE preprocess_data
+    expected_sorted = df.set_index("id").loc[ids].reset_index()
+    mock_preprocess_data.assert_called_once()
+    pd.testing.assert_frame_equal(mock_preprocess_data.call_args[0][0], expected_sorted)
+
+    # returned objects are tensors
+    self.assertIsInstance(tensor_x, torch.Tensor)
+    self.assertIsInstance(tensor_y, torch.Tensor)
+    self.assertIsInstance(imgs_tensor, torch.Tensor)
+
+    # sizes match
+    self.assertEqual(len(tensor_x), len(tensor_y) == 3)
+    self.assertEqual(len(imgs_tensor), 3)
+
+    def test_tensors_to_dataset(self):
+        features = torch.randn(5, 3)
+        imgs = torch.randn(5, 1, 10, 10)
+        labels = torch.randint(0, 2, (5,))
+
+        dataset = preprocessing.tensors_to_dataset(features, imgs, labels)
+
+        # Check dataset length
+        self.assertEqual(len(dataset), 5)
+
+        # Check alignment
+        f, i, l = dataset[2]
+        self.assertTrue(torch.equal(f, features[2]))
+        self.assertTrue(torch.equal(i, imgs[2]))
+        self.assertTrue(torch.equal(l, labels[2]))
 
 
 if __name__ == "__main__":
