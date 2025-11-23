@@ -32,8 +32,9 @@ def exp_run_mlp(seed: int):
     df = get_excel_data()
     X, y = preprocessing.preprocess_data(df)
     X, y = preprocessing.pd_to_numpy_X_y(X, y)
+    dataset = preprocessing.get_tensor_dataset(X, y)
 
     model = MLP(input_dim=X.shape[1], hidden_dim=100, output_dim=3)
-    preds = cross_val_train(model=model, X=X, y=y)
+    preds = cross_val_train(model=model, dataset=dataset, y=y)
 
     print(classification_report(y, preds))

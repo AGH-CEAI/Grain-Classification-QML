@@ -35,14 +35,17 @@ def train(
 
 
 def cross_val_train(
-    model: pl.LightningModule, X: np.ndarray, y: np.ndarray
+    model: pl.LightningModule,
+    dataset: data.TensorDataset,
+    y: np.ndarray | torch.Tensor,
+    n_splits: int = 5,
+    seed: int = 42,
 ) -> list[float]:
-    kfold = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
-    dataset = preprocessing.get_tensor_dataset(X, y)
+
+    kfold = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=seed)
     preds = np.empty(y.shape[0])
 
-    for fold, (train_idx, val_idx) in enumerate(kfold.split(X, y)):
-
+    for fold, (train_idx, val_idx) in enumerate(kfold.split(np.zeros(len(y)), y)):
         preds_fold = train(model, dataset, train_idx, val_idx)
         preds[val_idx] = preds_fold.numpy()
 
