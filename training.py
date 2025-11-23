@@ -5,29 +5,7 @@ import torch.utils.data as data
 from sklearn.model_selection import StratifiedKFold
 
 import preprocessing
-
-
-def get_dataloader(
-    dataset: data.TensorDataset,
-    indices: np.ndarray,
-    shuffle: bool = False,
-    batch_size: int = 32,
-) -> data.DataLoader:
-
-    if indices is not None:
-        subset = data.Subset(dataset, list(indices))
-        ds = subset
-    else:
-        ds = dataset
-
-    return data.DataLoader(
-        dataset=ds,
-        batch_size=batch_size,
-        shuffle=shuffle,
-        num_workers=0,
-        pin_memory=False,
-        persistent_workers=False,
-    )
+from utils import get_dataloader
 
 
 def train(
@@ -51,7 +29,7 @@ def train(
     trainer.fit(model, train_dataloader, val_dataloader)
 
     preds_batches = trainer.predict(model, val_dataloader)
-    preds = torch.cat(preds_batches)
+    preds = torch.cat(preds_batches)  # type: ignore
 
     return preds
 
