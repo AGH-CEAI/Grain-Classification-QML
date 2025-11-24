@@ -5,6 +5,7 @@ from sklearn.model_selection import StratifiedKFold
 import evaluation
 import models.benchmark_models as benchmark_models
 from models.mlp_multisource import MLPMultiSource
+from models.quantum_mlp_multisource import QuantumMLPMultiSource
 import preprocessing
 from data.load_data import get_excel_data, load_all_images
 from models.mlp import MLP
@@ -56,6 +57,28 @@ def exp_run_multisource_mlp(seed: int = 42):
     args = {"input_dim_feat": tensor_features.shape[1]}
     preds = cross_val_train(
         model_cls=MLPMultiSource,
+        model_args=args,
+        dataset=dataset,
+        y=tensor_labels,
+        seed=seed,
+    )
+
+    print(classification_report(tensor_labels, preds))
+
+
+def exp_run_quantum_multisource_mlp(seed: int = 42):
+    df = get_excel_data()
+    ids, imgs = load_all_images()
+    tensor_features, tensor_imgs, tensor_labels = preprocessing.preprocess_all(
+        df, imgs, ids
+    )
+    dataset = preprocessing.tensors_to_dataset(
+        tensor_features, tensor_imgs, tensor_labels
+    )
+
+    args = {"input_dim_feat": tensor_features.shape[1]}
+    preds = cross_val_train(
+        model_cls=QuantumMLPMultiSource,
         model_args=args,
         dataset=dataset,
         y=tensor_labels,

@@ -1,9 +1,26 @@
 import torch
 from torch import nn
 import pytorch_lightning as pl
+import pennylane as qml
+
+n_qubits = 6
+dev = qml.device("default.qubit", wires=n_qubits)
 
 
-class MLPMultiSource(pl.LightningModule):
+@qml.qnode(dev)
+def qnode(inputs, weights):
+    qml.AngleEmbedding(inputs, wires=range(n_qubits))
+    qml.BasicEntanglerLayers(weights, wires=range(n_qubits))
+    return [qml.expval(qml.PauliZ(wires=i)) for i in range(3)]
+
+
+n_layers = 3
+weight_shapes = {"weights": (n_layers, n_qubits)}
+
+qlayer = qml.qnn.TorchLayer(qnode, weight_shapes)
+
+
+class QuantumMLPMultiSource(pl.LightningModule):
 
     def __init__(
         self,
@@ -37,7 +54,7 @@ class MLPMultiSource(pl.LightningModule):
             nn.Linear(32 * 32 * hidden2_channels, output_img_dim),
         )
 
-        self.classifier = nn.Linear(output_img_dim + output_dim_feat, 3)  # 18 params
+        self.classifier = qlayer  # 18 params
 
         self.loss_fn = nn.CrossEntropyLoss()
 
