@@ -4,8 +4,9 @@ from sklearn.model_selection import StratifiedKFold
 
 import evaluation
 import models.benchmark_models as benchmark_models
+from models.mlp_multisource import MLPMultiSource
 import preprocessing
-from data.load_data import get_excel_data
+from data.load_data import get_excel_data, load_all_images
 from models.mlp import MLP
 from training import cross_val_train
 
@@ -28,13 +29,37 @@ def exp_run_all_class_models(file_name: str, seed: int):
             )
 
 
-def exp_run_mlp(seed: int):
+def exp_run_mlp(seed: int = 42):
     df = get_excel_data()
     X, y = preprocessing.preprocess_data(df)
     X, y = preprocessing.pd_to_numpy_X_y(X, y)
     dataset = preprocessing.get_tensor_dataset(X, y)
 
-    model = MLP(input_dim=X.shape[1], hidden_dim=100, output_dim=3)
-    preds = cross_val_train(model=model, dataset=dataset, y=y)
+    args = {"input_dim": X.shape[1], "hidden_dim": 100, "output_dim": 3}
+    preds = cross_val_train(
+        model_cls=MLP, model_args=args, dataset=dataset, y=y, seed=seed
+    )
 
     print(classification_report(y, preds))
+
+
+def exp_run_multisource_mlp(seed: int = 42):
+    df = get_excel_data()
+    ids, imgs = load_all_images()
+    tensor_features, tensor_imgs, tensor_labels = preprocessing.preprocess_all(
+        df, imgs, ids
+    )
+    dataset = preprocessing.tensors_to_dataset(
+        tensor_features, tensor_imgs, tensor_labels
+    )
+
+    args = {"input_dim_feat": tensor_features.shape[1]}
+    preds = cross_val_train(
+        model_cls=MLPMultiSource,
+        model_args=args,
+        dataset=dataset,
+        y=tensor_labels,
+        seed=seed,
+    )
+
+    print(classification_report(tensor_labels, preds))
