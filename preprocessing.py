@@ -155,7 +155,8 @@ def preprocess_images(images: List[Image.Image]) -> torch.Tensor:
 
 
 def sort_dataframe(df: pd.DataFrame, ids: List[str]) -> pd.DataFrame:
-    return df.set_index("id").loc[ids].reset_index()
+    ids = [iid[:-4] for iid in ids]
+    return df.set_index(COL_ID).loc[ids].reset_index()
 
 
 def preprocess_all(
