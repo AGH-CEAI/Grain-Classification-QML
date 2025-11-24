@@ -35,7 +35,8 @@ def train(
 
 
 def cross_val_train(
-    model: pl.LightningModule,
+    model_cls,
+    model_args: dict,
     dataset: data.TensorDataset,
     y: np.ndarray | torch.Tensor,
     n_splits: int = 5,
@@ -46,6 +47,7 @@ def cross_val_train(
     preds = np.empty(y.shape[0])
 
     for fold, (train_idx, val_idx) in enumerate(kfold.split(np.zeros(len(y)), y)):
+        model = model_cls(**model_args)
         preds_fold = train(model, dataset, train_idx, val_idx)
         preds[val_idx] = preds_fold.numpy()
 
