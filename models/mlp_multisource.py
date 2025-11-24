@@ -44,7 +44,7 @@ class MLPMultiSource(pl.LightningModule):
     def forward(self, features, image):
         features1 = self.model(features)
         features2 = self.cnn(image)
-        logits = self.classifier(torch.cat([features1, features2], dim=0))
+        logits = self.classifier(torch.cat([features1, features2], dim=1))
         return logits
 
     def training_step(self, batch, batch_idx):
@@ -55,10 +55,10 @@ class MLPMultiSource(pl.LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        x, y = batch
-        logits = self(x)
-        loss = self.loss_fn(logits, y)
-        acc = (logits.argmax(dim=1) == y).float().mean()
+        features, images, labels = batch
+        logits = self(features, images)
+        loss = self.loss_fn(logits, labels)
+        acc = (logits.argmax(dim=1) == labels).float().mean()
         self.log("val_loss", loss, prog_bar=True)
         self.log("val_acc", acc, prog_bar=True)
 
