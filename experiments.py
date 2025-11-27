@@ -3,6 +3,7 @@ from sklearn.metrics import classification_report
 from sklearn.model_selection import StratifiedKFold
 
 import evaluation
+import logging_utils
 import models.benchmark_models as benchmark_models
 from models.mlp_multisource import MLPMultiSource
 from models.quantum_mlp_multisource import QuantumMLPMultiSource
@@ -23,8 +24,8 @@ def exp_run_all_class_models(file_name: str, seed: int):
             model = model_fun()
             cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed)
             y_pred = cross_val_predict(model, X, y, cv=cv)
-            evaluation.print_report_to_file(f, model_name, y, y_pred)
-            evaluation.print_conf_matrix_to_file(f, model_name, y, y_pred)
+            logging_utils.print_report_to_file(f, model_name, y, y_pred)
+            logging_utils.print_conf_matrix_to_file(f, model_name, y, y_pred)
             f.write(
                 "\n\n******************************************************************************\n"
             )
