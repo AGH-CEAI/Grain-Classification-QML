@@ -31,21 +31,34 @@ def exp_run_all_class_models(file_name: str, seed: int):
             )
 
 
+# PyTorch ########################################
+
+
 def exp_run_mlp(seed: int = 42):
+    model_name = "MLP"
     df = get_excel_data()
     X, y = preprocessing.preprocess_data(df)
     X, y = preprocessing.pd_to_numpy_X_y(X, y)
     dataset = preprocessing.get_tensor_dataset(X, y)
 
-    args = {"input_dim": X.shape[1], "hidden_dim": 100, "output_dim": 3}
-    preds, metrics = cross_val_train(
-        model_cls=MLP, model_args=args, dataset=dataset, y=y, seed=seed
-    )
+    logging_utils.setup_mlflow()
+    with logging_utils.start_parent_run(model_name=model_name):
 
-    print(classification_report(y, preds))
+        hparams = {"input_dim": X.shape[1], "hidden_dim": 100, "output_dim": 3}
+        logging_utils.log_hyperparams(hparams)
 
+        preds, metrics = cross_val_train(
+            model_cls=MLP, model_args=hparams, dataset=dataset, y=y, seed=seed
+        )
 
-# PyTorch ########################################
+        # logging
+        logging_utils.log_aggregated_metrics(all_fold_metrics=metrics)
+        logging_utils.log_classification_report(
+            model_name=model_name, y_true=y, y_pred=preds
+        )
+        logging_utils.log_confusion_matrix(
+            model_name=model_name, y_true=y, y_pred=preds
+        )
 
 
 def exp_run_multisource_mlp(seed: int = 42):
