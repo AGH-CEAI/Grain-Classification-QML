@@ -38,16 +38,24 @@ def exp_run_mlp(seed: int = 42):
     dataset = preprocessing.get_tensor_dataset(X, y)
 
     args = {"input_dim": X.shape[1], "hidden_dim": 100, "output_dim": 3}
-    preds = cross_val_train(
+    preds, metrics = cross_val_train(
         model_cls=MLP, model_args=args, dataset=dataset, y=y, seed=seed
     )
 
     print(classification_report(y, preds))
 
 
+# PyTorch ########################################
+
+
 def exp_run_multisource_mlp(seed: int = 42):
+    model_name = "MLPMultiSource"
+
+    # Load data
     df = get_excel_data()
     ids, imgs = load_all_images()
+
+    # Preprocessing
     tensor_features, tensor_imgs, tensor_labels = preprocessing.preprocess_all(
         df, imgs, ids
     )
@@ -55,21 +63,49 @@ def exp_run_multisource_mlp(seed: int = 42):
         tensor_features, tensor_imgs, tensor_labels
     )
 
-    args = {"input_dim_feat": tensor_features.shape[1]}
-    preds = cross_val_train(
-        model_cls=MLPMultiSource,
-        model_args=args,
-        dataset=dataset,
-        y=tensor_labels,
-        seed=seed,
-    )
+    logging_utils.setup_mlflow()
+    with logging_utils.start_parent_run(model_name=model_name):
 
-    print(classification_report(tensor_labels, preds))
+        hparams = {
+            "input_dim_feat": tensor_features.shape[1],
+            "hidden_dim_feat": 100,
+            "output_dim_feat": 3,
+            "in_channels": 1,
+            "hidden_channels": 16,
+            "hidden2_channels": 8,
+            "output_img_dim": 3,
+            "kernel_size": 3,
+            "lr": 1e-3,
+        }
+        logging_utils.log_hyperparams(hparams)
+
+        # training
+        preds, metrics = cross_val_train(
+            model_cls=MLPMultiSource,
+            model_args=hparams,
+            dataset=dataset,
+            y=tensor_labels,
+            seed=seed,
+        )
+
+        # logging
+        logging_utils.log_aggregated_metrics(all_fold_metrics=metrics)
+        logging_utils.log_classification_report(
+            model_name=model_name, y_true=tensor_labels, y_pred=preds
+        )
+        logging_utils.log_confusion_matrix(
+            model_name=model_name, y_true=tensor_labels, y_pred=preds
+        )
 
 
 def exp_run_quantum_multisource_mlp(seed: int = 42):
+    model_name = "Quantum_MLPMultiSource"
+
+    # Load data
     df = get_excel_data()
     ids, imgs = load_all_images()
+
+    # Preprocessing
     tensor_features, tensor_imgs, tensor_labels = preprocessing.preprocess_all(
         df, imgs, ids
     )
@@ -77,13 +113,38 @@ def exp_run_quantum_multisource_mlp(seed: int = 42):
         tensor_features, tensor_imgs, tensor_labels
     )
 
-    args = {"input_dim_feat": tensor_features.shape[1]}
-    preds = cross_val_train(
-        model_cls=QuantumMLPMultiSource,
-        model_args=args,
-        dataset=dataset,
-        y=tensor_labels,
-        seed=seed,
-    )
+    logging_utils.setup_mlflow()
+    with logging_utils.start_parent_run(model_name=model_name):
 
-    print(classification_report(tensor_labels, preds))
+        hparams = {
+            "input_dim_feat": tensor_features.shape[1],
+            "hidden_dim_feat": 100,
+            "output_dim_feat": 3,
+            "in_channels": 1,
+            "hidden_channels": 16,
+            "hidden2_channels": 8,
+            "output_img_dim": 3,
+            "kernel_size": 3,
+            "n_qubits": 6,
+            "quantum_layers": 3,
+            "lr": 1e-3,
+        }
+        logging_utils.log_hyperparams(hparams)
+
+        # training
+        preds, metrics = cross_val_train(
+            model_cls=QuantumMLPMultiSource,
+            model_args=hparams,
+            dataset=dataset,
+            y=tensor_labels,
+            seed=seed,
+        )
+
+        # logging
+        logging_utils.log_aggregated_metrics(all_fold_metrics=metrics)
+        logging_utils.log_classification_report(
+            model_name=model_name, y_true=tensor_labels, y_pred=preds
+        )
+        logging_utils.log_confusion_matrix(
+            model_name=model_name, y_true=tensor_labels, y_pred=preds
+        )

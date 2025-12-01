@@ -1,6 +1,8 @@
 import torch
 from torch import nn
 import pytorch_lightning as pl
+from torchmetrics import MetricCollection
+from torchmetrics.classification import MulticlassAccuracy, MulticlassF1Score
 
 
 class MLPMultiSource(pl.LightningModule):
@@ -39,6 +41,15 @@ class MLPMultiSource(pl.LightningModule):
 
         self.classifier = nn.Linear(output_img_dim + output_dim_feat, 3)  # 18 params
 
+        # TorchMetrics
+        metrics = MetricCollection(
+            {
+                "acc": MulticlassAccuracy(num_classes=3),
+                "f1": MulticlassF1Score(num_classes=3),
+            }
+        )
+        self.train_metrics = metrics.clone(prefix="train_")
+        self.val_metrics = metrics.clone(prefix="val_")
         self.loss_fn = nn.CrossEntropyLoss()
 
     def forward(self, features, image):
@@ -51,16 +62,35 @@ class MLPMultiSource(pl.LightningModule):
         features, images, labels = batch
         logits = self(features, images)
         loss = self.loss_fn(logits, labels)
-        self.log("train_loss", loss)
+
+        preds = torch.argmax(logits, dim=1)
+        self.train_metrics.update(preds, labels)
+        self.log("train_loss", loss, on_epoch=True, on_step=False)
+
         return loss
+
+    def on_train_epoch_end(self):
+        # compute returns dictionary: {"train_acc": x, "train_f1": y}
+        metrics = self.train_metrics.compute()
+        # log each metric
+        for k, v in metrics.items():
+            self.log(k, v, prog_bar=True)
+        self.train_metrics.reset()
 
     def validation_step(self, batch, batch_idx):
         features, images, labels = batch
         logits = self(features, images)
         loss = self.loss_fn(logits, labels)
-        acc = (logits.argmax(dim=1) == labels).float().mean()
-        self.log("val_loss", loss, prog_bar=True)
-        self.log("val_acc", acc, prog_bar=True)
+
+        preds = torch.argmax(logits, dim=1)
+        self.log("val_loss", loss, on_epoch=True, on_step=False)
+        self.val_metrics.update(preds, labels)
+
+    def on_validation_epoch_end(self):
+        metrics = self.val_metrics.compute()
+        for k, v in metrics.items():
+            self.log(k, v, prog_bar=True)
+        self.val_metrics.reset()
 
     def predict_step(self, batch, batch_idx):
         features, images, _ = batch
