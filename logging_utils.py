@@ -73,6 +73,11 @@ def start_child_hp_run(fold_name: str):
     return mlflow.start_run(run_name=fold_name, nested=True)
 
 
+def log_metrics(metrics: dict):
+    for metric_name, values in metrics.items():
+        mlflow.log_metric(metric_name, values)
+
+
 def log_aggregated_metrics(all_fold_metrics: dict):
     for metric_name, values in all_fold_metrics.items():
         mlflow.log_metric(f"{metric_name}_mean", mean(values))

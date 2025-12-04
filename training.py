@@ -3,13 +3,21 @@ import mlflow
 import numpy as np
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import MLFlowLogger
+from sklearn.svm import SVC
 import torch
 import torch.utils.data as data
 from sklearn.model_selection import StratifiedKFold
-from sklearn.metrics import f1_score, accuracy_score
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    confusion_matrix,
+)
 
 from logging_utils import (
     EpochMetricsTracker,
+    log_metrics,
     start_child_hp_run,
 )
 from utils import get_dataloader
@@ -73,5 +81,48 @@ def cross_val_train(
             preds[val_idx] = preds_fold.numpy()
             fold_metrics["accuracy"].append(metrics["accuracy"])
             fold_metrics["f1"].append(metrics["f1"])
+
+    return preds.tolist(), fold_metrics
+
+
+def cross_val_svm(
+    model_args: dict,
+    X,
+    y,
+    n_splits: int = 5,
+    seed: int = 42,
+):
+    kf = StratifiedKFold(n_splits=n_splits, shuffle=True, random_state=seed)
+
+    preds = np.empty(y.shape[0])
+    fold_metrics = {"accuracy": [], "f1": []}  # store results for each fold
+
+    for fold, (train_idx, test_idx) in enumerate(kf.split(X, y), 1):
+        with start_child_hp_run(f"Fold {fold}"):
+            X_train, X_test = X[train_idx], X[test_idx]
+            y_train, y_test = y[train_idx], y[test_idx]
+
+            model = SVC(**model_args)
+            model.fit(X_train, y_train)
+
+            y_pred = model.predict(X_test)
+
+            metrics = {
+                "fold": fold,
+                "final_val_acc": accuracy_score(y_test, y_pred),
+                "precision": precision_score(
+                    y_test, y_pred, average="weighted", zero_division=0
+                ),
+                "recall": recall_score(
+                    y_test, y_pred, average="weighted", zero_division=0
+                ),
+                "final_val_f1": f1_score(
+                    y_test, y_pred, average="weighted", zero_division=0
+                ),
+            }
+            log_metrics(metrics)
+            fold_metrics["accuracy"].append(metrics["final_val_acc"])
+            fold_metrics["f1"].append(metrics["final_val_f1"])
+            preds[test_idx] = y_pred
 
     return preds.tolist(), fold_metrics

@@ -1,16 +1,17 @@
 from sklearn.calibration import cross_val_predict
-from sklearn.metrics import classification_report
 from sklearn.model_selection import StratifiedKFold
+from qiskit.circuit.library import ZZFeatureMap
 
-import evaluation
+
 import logging_utils
 import models.benchmark_models as benchmark_models
 from models.mlp_multisource import MLPMultiSource
+from models.qsvm import get_kernel_matrix_func
 from models.quantum_mlp_multisource import QuantumMLPMultiSource
 import preprocessing
 from data.load_data import get_excel_data, load_all_images
 from models.mlp import MLP
-from training import cross_val_train
+from training import cross_val_svm, cross_val_train
 
 
 def exp_run_all_class_models(file_name: str, seed: int):
@@ -44,7 +45,7 @@ def exp_run_mlp(seed: int = 42):
     logging_utils.setup_mlflow()
     with logging_utils.start_parent_run(model_name=model_name):
 
-        hparams = {"input_dim": X.shape[1], "hidden_dim": 100, "output_dim": 3}
+        hparams = {"input_dim": X.shape[1], "hidden_dim": 20, "output_dim": 3}
         logging_utils.log_hyperparams(hparams)
 
         preds, metrics = cross_val_train(
@@ -62,7 +63,7 @@ def exp_run_mlp(seed: int = 42):
 
 
 def exp_run_multisource_mlp(seed: int = 42):
-    model_name = "MLPMultiSource"
+    model_name = "MLPMultiSource_PLUS"
 
     # Load data
     df = get_excel_data()
@@ -81,11 +82,11 @@ def exp_run_multisource_mlp(seed: int = 42):
 
         hparams = {
             "input_dim_feat": tensor_features.shape[1],
-            "hidden_dim_feat": 100,
+            "hidden_dim_feat": 20,
             "output_dim_feat": 3,
             "in_channels": 1,
-            "hidden_channels": 16,
-            "hidden2_channels": 8,
+            "hidden_channels": 8,
+            "hidden2_channels": 4,
             "output_img_dim": 3,
             "kernel_size": 3,
             "lr": 1e-3,
@@ -131,11 +132,11 @@ def exp_run_quantum_multisource_mlp(seed: int = 42):
 
         hparams = {
             "input_dim_feat": tensor_features.shape[1],
-            "hidden_dim_feat": 100,
+            "hidden_dim_feat": 20,
             "output_dim_feat": 3,
             "in_channels": 1,
-            "hidden_channels": 16,
-            "hidden2_channels": 8,
+            "hidden_channels": 8,
+            "hidden2_channels": 4,
             "output_img_dim": 3,
             "kernel_size": 3,
             "n_qubits": 6,
@@ -161,3 +162,137 @@ def exp_run_quantum_multisource_mlp(seed: int = 42):
         logging_utils.log_confusion_matrix(
             model_name=model_name, y_true=tensor_labels, y_pred=preds
         )
+
+
+# SVM ########################################
+
+
+def exp_run_multisource_SVM(seed: int = 42):
+    model_name = "SVMMultiSource"
+
+    # Load data
+    df = get_excel_data()
+    ids, imgs = load_all_images()
+
+    # Preprocessing
+    tensor_features, tensor_imgs, tensor_labels = preprocessing.preprocess_all(
+        df, imgs, ids
+    )
+    reduced_tensor_imgs = preprocessing.dim_reduction(tensor_imgs, 12)
+    X = preprocessing.join_multisource(tensor_features, reduced_tensor_imgs)
+
+    logging_utils.setup_mlflow()
+    with logging_utils.start_parent_run(model_name=model_name):
+
+        hparams = {"kernel": "rbf", "C": 1}
+        logging_utils.log_hyperparams(hparams)
+
+        # training
+        preds, metrics = cross_val_svm(
+            model_args=hparams, X=X, y=tensor_labels, n_splits=5, seed=seed
+        )
+
+        # logging
+        logging_utils.log_aggregated_metrics(all_fold_metrics=metrics)
+        logging_utils.log_classification_report(
+            model_name=model_name, y_true=tensor_labels, y_pred=preds
+        )
+        logging_utils.log_confusion_matrix(
+            model_name=model_name, y_true=tensor_labels, y_pred=preds
+        )
+
+
+def exp_run_quantum_multisource_SVM(seed: int = 42):
+    model_name = "Quantum_SVMMultiSource"
+
+    # Load data
+    df = get_excel_data()
+    ids, imgs = load_all_images()
+
+    # Preprocessing
+    tensor_features, tensor_imgs, tensor_labels = preprocessing.preprocess_all(
+        df, imgs, ids
+    )
+    reduced_tensor_imgs = preprocessing.dim_reduction(tensor_imgs, 12)
+    X = preprocessing.join_multisource(tensor_features, reduced_tensor_imgs)
+
+    logging_utils.setup_mlflow()
+    with logging_utils.start_parent_run(model_name=model_name):
+        feature_map_hparams = {
+            "feature_map_type": "AmplitudeEncoding",
+            "n_qubits": 5,
+        }
+        svm_hparams = {"C": 1.0}
+
+        logging_utils.log_hyperparams(feature_map_hparams)
+        logging_utils.log_hyperparams(svm_hparams)
+
+        qkernel = get_kernel_matrix_func(
+            n_qubits=feature_map_hparams["n_qubits"], seed=seed
+        )
+
+        # training
+        preds, metrics = cross_val_svm(
+            model_args={"kernel": qkernel},
+            X=X,
+            y=tensor_labels,
+            n_splits=5,
+            seed=seed,
+        )
+
+        # logging
+        logging_utils.log_aggregated_metrics(all_fold_metrics=metrics)
+        logging_utils.log_classification_report(
+            model_name=model_name, y_true=tensor_labels, y_pred=preds
+        )
+        logging_utils.log_confusion_matrix(
+            model_name=model_name, y_true=tensor_labels, y_pred=preds
+        )
+
+
+# def exp_run_quantum_multisource_SVM_qiskit(seed: int = 42):
+#     model_name = "Quantum_SVMMultiSource"
+
+#     # Load data
+#     df = get_excel_data()
+#     ids, imgs = load_all_images()
+
+#     # Preprocessing
+#     tensor_features, tensor_imgs, tensor_labels = preprocessing.preprocess_all(
+#         df, imgs, ids
+#     )
+#     reduced_tensor_imgs = preprocessing.dim_reduction(tensor_imgs, 12)
+#     X = preprocessing.join_multisource(tensor_features, reduced_tensor_imgs)
+
+#     logging_utils.setup_mlflow()
+#     with logging_utils.start_parent_run(model_name=model_name):
+#         feature_map_hparams = {
+#             "feature_map_type": "ZZFeatureMap",
+#             "dimension": 12,
+#             "reps": 2,
+#             "entanglement": "linear",
+#         }
+#         feature_map = get_feature_map(**feature_map_hparams)
+#         kernel = get_q_kernel(feature_map)
+#         svm_hparams = {"C": 1.0}
+
+#         logging_utils.log_hyperparams(feature_map_hparams)
+#         logging_utils.log_hyperparams(svm_hparams)
+
+#         # training
+#         preds, metrics = cross_val_svm(
+#             model_args={"kernel": kernel.evaluate},
+#             X=X,
+#             y=tensor_labels,
+#             n_splits=5,
+#             seed=seed,
+#         )
+
+#         # logging
+#         logging_utils.log_aggregated_metrics(all_fold_metrics=metrics)
+#         logging_utils.log_classification_report(
+#             model_name=model_name, y_true=tensor_labels, y_pred=preds
+#         )
+#         logging_utils.log_confusion_matrix(
+#             model_name=model_name, y_true=tensor_labels, y_pred=preds
+#         )

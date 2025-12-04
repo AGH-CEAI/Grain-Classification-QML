@@ -6,7 +6,7 @@ import torch
 from torch.utils.data import TensorDataset
 from PIL import Image
 from torchvision import transforms
-
+from sklearn.decomposition import PCA
 
 COLS_TO_DROP = ["No.", "Id"]
 COL_ID = ["Id"]
@@ -151,6 +151,20 @@ def preprocess_images(images: List[Image.Image]) -> torch.Tensor:
     return torch.stack(preprocessed_images, dim=0)
 
 
+### IMAGE REDUCTION ########################################
+
+
+def img_tensor_to_ndarray(images: torch.Tensor) -> np.ndarray:
+    return images.cpu().detach().numpy()
+
+
+def dim_reduction(images: np.ndarray | torch.Tensor, target_dim: int) -> torch.Tensor:
+    images_flat = images.reshape(len(images), -1)
+    pca = PCA(n_components=target_dim)
+    images_reduced = pca.fit_transform(images_flat)  # type: ignore
+    return torch.from_numpy(images_reduced)
+
+
 ### JOINED PREPROCESSING ########################################
 
 
@@ -176,3 +190,7 @@ def tensors_to_dataset(
     features: torch.Tensor, imgs: torch.Tensor, labels: torch.Tensor
 ) -> TensorDataset:
     return TensorDataset(features, imgs, labels)
+
+
+def join_multisource(x1: torch.Tensor, x2: torch.Tensor) -> torch.Tensor:
+    return torch.cat((x1, x2), dim=1)
