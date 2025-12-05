@@ -10,10 +10,11 @@ def main():
     # exp_run_all_class_models("initial_classical_results_42_mlp_new", 42)
     # experiments.exp_run_mlp(seed=42)
 
-    experiments.exp_run_multisource_mlp(seed=42)
+    # experiments.exp_run_multisource_mlp(seed=42)
     # experiments.exp_run_quantum_multisource_mlp(seed=42)
     # experiments.exp_run_multisource_SVM(seed=42)
     # experiments.exp_run_quantum_multisource_SVM(seed=42)
+    experiments.combined_two_tailed_ttest()
 
 
 if __name__ == "__main__":

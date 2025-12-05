@@ -3,3 +3,4 @@ __pycache__/
 mlruns/
 lightning_logs/
 results/
+notes.txt
