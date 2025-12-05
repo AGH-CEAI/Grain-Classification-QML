@@ -1,8 +1,6 @@
 from typing import Tuple
-import mlflow
 import numpy as np
 import pytorch_lightning as pl
-from pytorch_lightning.loggers import MLFlowLogger
 from sklearn.svm import SVC
 import torch
 import torch.utils.data as data
@@ -12,7 +10,6 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
     f1_score,
-    confusion_matrix,
 )
 
 from logging_utils import (
@@ -70,7 +67,7 @@ def cross_val_train(
     preds = np.empty(y.shape[0])
     fold_metrics = {"accuracy": [], "f1": []}
 
-    for fold, (train_idx, val_idx) in enumerate(kfold.split(np.zeros(len(y)), y)):
+    for fold, (train_idx, val_idx) in enumerate(kfold.split(np.zeros(len(y)), y), 1):
         with start_child_hp_run(f"Fold {fold}"):
 
             # Create model instance and train it
